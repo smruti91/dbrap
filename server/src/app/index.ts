@@ -5,7 +5,8 @@ import { authRouter } from './auth/auth.routes.js';
 import { errorHandler } from './middleware/errorHandler.middleware.js';
 import cookieParser  from "cookie-parser"
 import cors from "cors"
-
+import { router as dashboardRouter } from './dashboard/dashboard.routes.js';    
+import { adminRouter } from './admin/admin.routes.js';
 
 
 export function createApplication(): Express{
@@ -17,7 +18,9 @@ export function createApplication(): Express{
         }));
     app.use(express.json());
     app.use(cookieParser());
-    app.use('/api/v1/auth', authRouter)
+    app.use('/api/v1/auth', authRouter);
+    app.use('/api/v1/dashboard', dashboardRouter);
+    app.use('/api/v1/admin', adminRouter);
     
      app.use(errorHandler)
     //routs

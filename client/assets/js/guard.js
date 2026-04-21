@@ -1,5 +1,5 @@
 const ROLE_ROUTES = {
-    admin:   './dashboard/admin.html',
+    admin:   './dashboard/dbrap_dashboard.html',
     manager: './dashboard/manager.html',
     user:    './dashboard/user.html',
 };
@@ -48,5 +48,5 @@ async function checkAlreadyLoggedIn() {
 }
 
 function redirectByRole(role) {
-    window.location.href = ROLE_ROUTES[role] || './login.html';
+    window.location.href = ROLE_ROUTES[role] || '../login.html';
 }
