@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Auth Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #141418;
+      --border: #222228;
+      --accent: #c8f135;
+      --accent-dim: #a8cc20;
+      --text: #e8e8ec;
+      --muted: #6b6b7a;
+      --danger: #f13535;
+      --success: #35f187;
+      --radius: 6px;
+      --mono: 'DM Mono', monospace;
+      --head: 'Syne', sans-serif;
+    }
+
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-brand {
+      font-family: var(--head);
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+    }
+
+    .status-dot.active { background: var(--success); }
+    .status-dot.refreshing { background: var(--accent); animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 8px 18px;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.03em;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0d0d0f;
+      font-weight: 500;
+      width: 100%;
+      padding: 12px;
+      font-size: 0.85rem;
+    }
+
+    .btn-primary:hover:not(:disabled) { background: var(--accent-dim); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 7px 16px;
+    }
+
+    .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+    .btn-sm {
+      background: var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      font-size: 0.75rem;
+    }
+
+    .btn-sm:hover { background: #2a2a32; }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 520px;
+      margin: auto;
+      padding: 40px 20px;
+    }
+
+    /* ── LOGIN VIEW ── */
+    #loginView {
+      animation: fadeUp 0.35s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-header {
+      margin-bottom: 32px;
+    }
+
+    .login-header h2 {
+      font-family: var(--head);
+      font-size: 1.8rem;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .login-header p {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .field-group {
+      margin-bottom: 14px;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .field-group input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      padding: 11px 14px;
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .field-group input::placeholder { color: var(--muted); }
+
+    .login-footer {
+      margin-top: 20px;
+    }
+
+    #loginMsg {
+      margin-top: 12px;
+      font-size: 0.78rem;
+      color: var(--danger);
+      min-height: 18px;
+    }
+
+    /* ── DASHBOARD VIEW ── */
+    #dashboardView {
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .dash-header {
+      margin-bottom: 28px;
+    }
+
+    .dash-header h2 {
+      font-family: var(--head);
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+    }
+
+    .dash-header p {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    #userData {
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--accent);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* ── LOG ── */
+    .log-area {
+      background: #0a0a0c;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      font-size: 0.72rem;
+      line-height: 1.8;
+      color: var(--muted);
+      display: flex;
+      gap: 10px;
+    }
+
+    .log-entry .log-time { color: #3a3a48; }
+    .log-entry.log-ok .log-msg { color: var(--success); }
+    .log-entry.log-warn .log-msg { color: var(--accent); }
+    .log-entry.log-err .log-msg { color: var(--danger); }
+    .log-entry.log-info .log-msg { color: var(--text); }
+
+    /* ── HIDDEN ── */
+    .hidden { display: none !important; }
+
+    /* ── SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--border) 25%, #2a2a32 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px;
+      height: 14px;
+      margin: 6px 0;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-brand">⬡ DASHBOARD</div>
+  <div class="nav-right">
+    <div class="status-pill">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">offline</span>
+    </div>
+    <button class="btn btn-ghost" onclick="logout()" id="logoutBtn">logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LOGIN VIEW -->
+  <div id="loginView">
+    <div class="login-header">
+      <h2>Sign in</h2>
+      <p>Enter your credentials to continue</p>
+    </div>
+
+    <div class="field-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="john_doe" autocomplete="username" />
+    </div>
+
+    <div class="field-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter') login()" />
+    </div>
+
+    <div class="login-footer">
+      <button class="btn btn-primary" id="loginBtn" onclick="login()">Sign in →</button>
+      <div id="loginMsg"></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboardView" class="hidden">
+    <div class="dash-header">
+      <h2>Welcome back</h2>
+      <p id="dashSubtitle">Loading your profile...</p>
+    </div>
+
+    <div class="card">
+      <div class="card-label">// profile</div>
+      <div id="userSkeleton">
+        <div class="skeleton" style="width:60%"></div>
+        <div class="skeleton" style="width:80%"></div>
+        <div class="skeleton" style="width:45%"></div>
+      </div>
+      <pre id="userData" class="hidden"></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-actions">
+        <button class="btn btn-sm" onclick="loadUser()">↺ reload profile</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">// activity log</div>
+      <div class="log-area" id="logArea"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API = "http://127.0.0.1:5000/api/v1/auth";
+
+  /* ─── TOKEN REFRESH QUEUE ─── */
+  let isRefreshing = false;
+  let refreshQueue = [];
+
+  function enqueueRefresh(fn) {
+    return new Promise((resolve, reject) => {
+      refreshQueue.push({ fn, resolve, reject });
+    });
+  }
+
+  async function processQueue(success) {
+    const q = refreshQueue.splice(0);
+    for (const item of q) {
+      if (success) {
+        try { item.resolve(await item.fn()); }
+        catch (e) { item.reject(e); }
+      } else {
+        item.reject(new Error("Session expired"));
+      }
+    }
+  }
+
+  /* ─── AUTHENTICATED FETCH ───
+     Every protected request goes through here.
+     On 401 → refresh → retry once. On second 401 → logout.
+  */
+  async function authFetch(url, options = {}) {
+    const res = await fetch(url, { credentials: "include", ...options });
+
+    if (res.status !== 401) return res;
+
+    // ── 401 hit ──
+    if (isRefreshing) {
+      // Queue this call until the in-flight refresh resolves
+      return enqueueRefresh(() => authFetch(url, options));
+    }
+
+    isRefreshing = true;
+    setStatus("refreshing");
+    addLog("warn", "Access token expired — refreshing…");
+
+    try {
+      const refreshRes = await fetch(`${API}/refresh-token`, {
+        method: "POST",
+        credentials: "include"
+      });
+
+      if (!refreshRes.ok) throw new Error("Refresh failed");
+
+      addLog("ok", "Token refreshed successfully");
+      setStatus("active");
+      isRefreshing = false;
+
+      await processQueue(true);
+
+      // Retry the original request with the new token
+      return fetch(url, { credentials: "include", ...options });
+
+    } catch (err) {
+      isRefreshing = false;
+      await processQueue(false);
+      addLog("err", "Session expired — please sign in again");
+      setStatus("offline");
+      showLogin();
+      throw err;
+    }
+  }
+
+  /* ─── LOGIN ─── */
+  async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const btn = document.getElementById("loginBtn");
+    const msg = document.getElementById("loginMsg");
+
+    if (!username || !password) {
+      msg.textContent = "Please fill in all fields.";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    msg.textContent = "";
+
+    try {
+      const res = await fetch(`${API}/sign-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        msg.textContent = data.message || "Invalid credentials.";
+        return;
+      }
+
+      addLog("ok", `Signed in as ${username}`);
+      showDashboard();
+      // ── after login, fetch /me ──
+      await loadUser();
+
+    } catch (err) {
+      msg.textContent = "Network error. Try again.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Sign in →";
+    }
+  }
+
+  /* ─── LOAD USER (/me) ─── */
+  async function loadUser() {
+    const skeleton = document.getElementById("userSkeleton");
+    const userData = document.getElementById("userData");
+
+    skeleton.classList.remove("hidden");
+    userData.classList.add("hidden");
+
+    addLog("info", "GET /me");
+
+    try {
+      // authFetch handles 401 → refresh → retry automatically
+      const res = await authFetch(`${API}/me`, { method: "GET" });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to load user");
+
+      userData.textContent = JSON.stringify(data, null, 2);
+      document.getElementById("dashSubtitle").textContent =
+        `Logged in as ${data.username || data.email || "user"}`;
+
+      addLog("ok", "Profile loaded");
+    } catch (err) {
+      addLog("err", err.message);
+    } finally {
+      skeleton.classList.add("hidden");
+      userData.classList.remove("hidden");
+    }
+  }
+
+  /* ─── LOGOUT ─── */
+  async function logout() {
+    try {
+      await fetch(`${API}/logout`, { method: "POST", credentials: "include" });
+      addLog("info", "Logged out");
+    } catch (_) {}
+    setStatus("offline");
+    showLogin();
+  }
+
+  /* ─── VIEW SWITCH ─── */
+  function showDashboard() {
+    document.getElementById("loginView").classList.add("hidden");
+    document.getElementById("dashboardView").classList.remove("hidden");
+    setStatus("active");
+  }
+
+  function showLogin() {
+    document.getElementById("dashboardView").classList.add("hidden");
+    document.getElementById("loginView").classList.remove("hidden");
+    document.getElementById("loginMsg").textContent = "";
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+  }
+
+  /* ─── STATUS DOT ─── */
+  function setStatus(state) {
+    const dot = document.getElementById("statusDot");
+    const txt = document.getElementById("statusText");
+    dot.className = "status-dot";
+    if (state === "active") { dot.classList.add("active"); txt.textContent = "authenticated"; }
+    else if (state === "refreshing") { dot.classList.add("refreshing"); txt.textContent = "refreshing…"; }
+    else { txt.textContent = "offline"; }
+  }
+
+  /* ─── ACTIVITY LOG ─── */
+  function addLog(type, msg) {
+    const area = document.getElementById("logArea");
+    if (!area) return;
+    const now = new Date().toLocaleTimeString("en-GB", { hour12: false });
+    const entry = document.createElement("div");
+    entry.className = `log-entry log-${type}`;
+    entry.innerHTML = `<span class="log-time">${now}</span><span class="log-msg">${msg}</span>`;
+    area.appendChild(entry);
+    area.scrollTop = area.scrollHeight;
+  }
+
+  /* ─── AUTO SESSION CHECK ON LOAD ─── */
+  window.onload = async () => {
+    addLog("info", "Checking existing session…");
+    try {
+      // Try /me directly; if token expired, authFetch will refresh automatically
+      const res = await authFetch(`${API}/me`, { method: "GET" });
+      if (res.ok) {
+        const data = await res.json();
+        showDashboard();
+        document.getElementById("userData").textContent = JSON.stringify(data, null, 2);
+        document.getElementById("userSkeleton").classList.add("hidden");
+        document.getElementById("userData").classList.remove("hidden");
+        document.getElementById("dashSubtitle").textContent =
+          `Logged in as ${data.username || data.email || "user"}`;
+        addLog("ok", "Session restored");
+      } else {
+        showLogin();
+        addLog("info", "No active session");
+      }
+    } catch {
+      showLogin();
+      addLog("info", "No active session");
+    }
+  };
+</script>
+</body>
+</html>

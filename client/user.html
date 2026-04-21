@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — DBRAP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #fafaf8;
+            --surface:  #ffffff;
+            --surface2: #f5f4f0;
+            --border:   #e8e5de;
+            --text:     #1c1917;
+            --muted:    #78716c;
+            --accent:   #16a34a;
+            --accent-lt:#dcfce7;
+            --green:    #16a34a;
+            --yellow:   #d97706;
+            --red:      #dc2626;
+            --radius:   6px;
+            --serif:    'Instrument Serif', Georgia, serif;
+            --mono:     'Geist Mono', monospace;
+        }
+
+        body {
+            font-family: var(--mono);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            height: 54px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .nav-logo { font-family: var(--serif); font-size: 1.1rem; color: var(--text); }
+
+        .role-badge {
+            font-size: 0.58rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: var(--accent-lt);
+            color: var(--accent);
+            border: 1px solid #bbf7d0;
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .nav-user  { font-size: 0.7rem; color: var(--muted); }
+
+        .btn-logout {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .btn-logout:hover { color: var(--text); border-color: var(--muted); }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+
+        .page-header { margin-bottom: 28px; animation: fadeUp 0.35s ease both; }
+
+        .page-header h1 {
+            font-family: var(--serif);
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-bottom: 3px;
+        }
+
+        .page-header p { font-size: 0.7rem; color: var(--muted); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* profile card */
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            margin-bottom: 22px;
+            animation: fadeUp 0.35s 0.05s ease both;
+        }
+
+        .avatar {
+            width: 48px; height: 48px;
+            background: var(--accent-lt);
+            border: 1px solid #bbf7d0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--serif);
+            font-size: 1.3rem;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .profile-info h3 { font-size: 0.9rem; margin-bottom: 3px; font-weight: 400; }
+        .profile-info p  { font-size: 0.68rem; color: var(--muted); }
+
+        /* schemes grid */
+        .section-label {
+            font-size: 0.62rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+            animation: fadeUp 0.35s 0.08s ease both;
+        }
+
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            animation: fadeUp 0.35s 0.1s ease both;
+        }
+
+        .table-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-title { font-size: 0.67rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+        .btn-sm {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-sm:hover { background: var(--border); }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+
+        thead th {
+            text-align: left;
+            padding: 9px 18px;
+            font-size: 0.59rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            font-weight: 400;
+        }
+
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--surface2); }
+        tbody td { padding: 12px 18px; }
+
+        .badge {
+            font-size: 0.57rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 999px;
+            border: 1px solid;
+        }
+
+        .badge-green  { color: var(--green);  background: #f0fdf4; border-color: #bbf7d0; }
+        .badge-yellow { color: var(--yellow); background: #fffbeb; border-color: #fde68a; }
+        .badge-red    { color: var(--red);    background: #fef2f2; border-color: #fecaca; }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--border) 25%, var(--surface2) 50%, var(--border) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 3px; height: 11px;
+        }
+
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .page-loader {
+            position: fixed; inset: 0;
+            background: var(--bg);
+            display: grid; place-items: center;
+            z-index: 200;
+            transition: opacity 0.3s;
+        }
+
+        .page-loader.hide { opacity: 0; pointer-events: none; }
+
+        .loader-ring {
+            width: 28px; height: 28px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="page-loader" id="pageLoader">
+    <div class="loader-ring"></div>
+</div>
+
+<nav>
+    <div class="nav-left">
+        <span class="nav-logo">DBRAP</span>
+        <span class="role-badge">User</span>
+    </div>
+    <div class="nav-right">
+        <span class="nav-user" id="navUser">—</span>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="page-header">
+        <h1>My Dashboard</h1>
+        <p>Your assigned credit schemes</p>
+    </div>
+
+    <!-- profile -->
+    <div class="profile-card">
+        <div class="avatar" id="avatarChar">—</div>
+        <div class="profile-info">
+            <h3 id="profileName">Loading...</h3>
+            <p id="profileRole">—</p>
+        </div>
+    </div>
+
+    <!-- schemes -->
+    <div class="section-label">My Schemes</div>
+    <div class="table-card">
+        <div class="table-head">
+            <div class="table-title">Assigned Schemes</div>
+            <button class="btn-sm" onclick="loadSchemes()">↺ Refresh</button>
+        </div>
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Type</th><th>Amount</th><th>Status</th><th>Domain</th></tr>
+            </thead>
+            <tbody id="schemesBody">
+                <tr><td><div class="skeleton" style="width:110px"></div></td><td><div class="skeleton" style="width:70px"></div></td><td><div class="skeleton" style="width:65px"></div></td><td><div class="skeleton" style="width:55px"></div></td><td><div class="skeleton" style="width:90px"></div></td></tr>
+                <tr><td><div class="skeleton" style="width:130px"></div></td><td><div class="skeleton" style="width:55px"></div></td><td><div class="skeleton" style="width:75px"></div></td><td><div class="skeleton" style="width:55px"></div></td><td><div class="skeleton" style="width:80px"></div></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="/dbrap/js/api.js"></script>
+<script src="/dbrap/js/guard.js"></script>
+<script>
+    const statusBadge = {
+        active:  '<span class="badge badge-green">Active</span>',
+        pending: '<span class="badge badge-yellow">Pending</span>',
+        closed:  '<span class="badge badge-red">Closed</span>',
+    };
+
+    window.onload = async () => {
+        const user = await guardPage(['admin', 'manager', 'user']);
+        if (!user) return;
+
+        const name = user.name || user.username || 'User';
+        document.getElementById('navUser').textContent    = name;
+        document.getElementById('profileName').textContent = name;
+        document.getElementById('profileRole').textContent = user.role;
+        document.getElementById('avatarChar').textContent  = name.charAt(0).toUpperCase();
+        document.getElementById('pageLoader').classList.add('hide');
+
+        loadSchemes();
+    };
+
+    async function loadSchemes() {
+        try {
+            const res  = await apiFetch('/schemes/my');
+            const data = await res.json();
+            const rows = (data.schemes || []).map(s => `
+                <tr>
+                    <td>${s.name}</td>
+                    <td>${s.type}</td>
+                    <td>₹${Number(s.amount).toLocaleString()}</td>
+                    <td>${statusBadge[s.status] || s.status}</td>
+                    <td><span style="color:var(--muted)">${s.domain || '—'}</span></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px;font-size:0.72rem">No schemes assigned</td></tr>';
+
+            document.getElementById('schemesBody').innerHTML = rows;
+        } catch {
+            document.getElementById('schemesBody').innerHTML =
+                '<tr><td colspan="5" style="text-align:center;color:var(--red);padding:28px;font-size:0.72rem">Failed to load schemes</td></tr>';
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin — DBRAP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #0f1117;
+            --surface:  #161b27;
+            --surface2: #1d2333;
+            --border:   #252d3d;
+            --text:     #e2e8f0;
+            --muted:    #64748b;
+            --accent:   #3b82f6;
+            --accent-lt:#1e3a5f;
+            --green:    #22c55e;
+            --yellow:   #f59e0b;
+            --red:      #ef4444;
+            --radius:   6px;
+            --serif:    'Instrument Serif', Georgia, serif;
+            --mono:     'Geist Mono', monospace;
+        }
+
+        body {
+            font-family: var(--mono);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        /* ── NAV ── */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            height: 56px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-logo {
+            font-family: var(--serif);
+            font-size: 1.15rem;
+            color: var(--text);
+        }
+
+        .role-badge {
+            font-size: 0.6rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: var(--accent-lt);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .nav-user {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .btn-logout {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .btn-logout:hover { color: var(--text); border-color: var(--muted); }
+
+        /* ── LAYOUT ── */
+        .layout {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* ── SIDEBAR ── */
+        aside {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+        }
+
+        .sidebar-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 0 20px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            font-size: 0.75rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            border-left: 2px solid transparent;
+            user-select: none;
+        }
+
+        .sidebar-link:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .sidebar-link.active {
+            background: var(--surface2);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-icon { font-size: 0.9rem; width: 16px; text-align: center; }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 20px;
+        }
+
+        /* ── MAIN ── */
+        main {
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .page-header h1 {
+            font-family: var(--serif);
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── STATS ── */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+            animation: fadeUp 0.4s 0.05s ease both;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-family: var(--serif);
+            font-size: 1.8rem;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-delta {
+            font-size: 0.65rem;
+            color: var(--green);
+        }
+
+        /* ── TABLE CARD ── */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            animation: fadeUp 0.4s 0.1s ease both;
+            overflow: hidden;
+        }
+
+        .table-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-title {
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .btn-sm {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.08em;
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-sm:hover { background: var(--border); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 10px 20px;
+            font-size: 0.62rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            font-weight: 400;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.1s;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--surface2); }
+
+        tbody td { padding: 12px 20px; color: var(--text); }
+
+        /* badges */
+        .badge {
+            font-size: 0.6rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid;
+        }
+
+        .badge-green  { color: var(--green);  background: #052e16; border-color: #166534; }
+        .badge-yellow { color: var(--yellow); background: #1c1003; border-color: #92400e; }
+        .badge-red    { color: var(--red);    background: #1c0505; border-color: #991b1b; }
+        .badge-blue   { color: var(--accent); background: var(--accent-lt); border-color: #1d4ed8; }
+
+        /* skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--border) 25%, var(--surface2) 50%, var(--border) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 3px;
+            height: 12px;
+        }
+
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-row td { padding: 14px 20px; }
+
+        /* sections */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* page loader */
+        .page-loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: grid;
+            place-items: center;
+            z-index: 200;
+            transition: opacity 0.3s;
+        }
+
+        .page-loader.hide { opacity: 0; pointer-events: none; }
+
+        .loader-ring {
+            width: 32px; height: 32px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="page-loader" id="pageLoader">
+    <div class="loader-ring"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-left">
+        <span class="nav-logo">DBRAP</span>
+        <span class="role-badge">Admin</span>
+    </div>
+    <div class="nav-right">
+        <span class="nav-user" id="navUser">—</span>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+</nav>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside>
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-link active" onclick="showSection('overview', this)">
+            <span class="sidebar-icon">◈</span> Overview
+        </div>
+        <div class="sidebar-link" onclick="showSection('schemes', this)">
+            <span class="sidebar-icon">◉</span> Schemes
+        </div>
+        <div class="sidebar-link" onclick="showSection('users', this)">
+            <span class="sidebar-icon">◎</span> Users
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">Reports</div>
+        <div class="sidebar-link" onclick="showSection('reports', this)">
+            <span class="sidebar-icon">◫</span> Reports
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+
+        <!-- OVERVIEW -->
+        <div class="section active" id="section-overview">
+            <div class="page-header">
+                <h1>Overview</h1>
+                <p>Admin dashboard — all data visible</p>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Schemes</div>
+                    <div class="stat-value" id="statSchemes">—</div>
+                    <div class="stat-delta">↑ all active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value" id="statUsers">—</div>
+                    <div class="stat-delta">↑ registered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value" id="statActive">—</div>
+                    <div class="stat-delta">↑ running</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-value" id="statPending">—</div>
+                    <div class="stat-delta" style="color:var(--yellow)">↗ review</div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-head">
+                    <div class="table-title">Recent Schemes</div>
+                    <button class="btn-sm" onclick="loadSchemes()">↺ Refresh</button>
+                </div>
+                <div id="schemesTableWrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th><th>Type</th><th>Amount</th><th>Status</th><th>Domain</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schemesBody">
+                            <tr class="skeleton-row"><td><div class="skeleton" style="width:120px"></div></td><td><div class="skeleton" style="width:80px"></div></td><td><div class="skeleton" style="width:70px"></div></td><td><div class="skeleton" style="width:60px"></div></td><td><div class="skeleton" style="width:100px"></div></td></tr>
+                            <tr class="skeleton-row"><td><div class="skeleton" style="width:140px"></div></td><td><div class="skeleton" style="width:60px"></div></td><td><div class="skeleton" style="width:80px"></div></td><td><div class="skeleton" style="width:60px"></div></td><td><div class="skeleton" style="width:90px"></div></td></tr>
+                            <tr class="skeleton-row"><td><div class="skeleton" style="width:100px"></div></td><td><div class="skeleton" style="width:90px"></div></td><td><div class="skeleton" style="width:70px"></div></td><td><div class="skeleton" style="width:60px"></div></td><td><div class="skeleton" style="width:110px"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCHEMES -->
+        <div class="section" id="section-schemes">
+            <div class="page-header">
+                <h1>Schemes</h1>
+                <p>All credit link schemes from external domains</p>
+            </div>
+            <div class="table-card">
+                <div class="table-head">
+                    <div class="table-title">All Schemes</div>
+                    <button class="btn-sm" onclick="loadSchemes()">↺ Refresh</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Amount</th><th>Status</th><th>Domain</th></tr>
+                    </thead>
+                    <tbody id="schemesBody2">
+                        <tr class="skeleton-row"><td><div class="skeleton" style="width:120px"></div></td><td><div class="skeleton" style="width:80px"></div></td><td><div class="skeleton" style="width:70px"></div></td><td><div class="skeleton" style="width:60px"></div></td><td><div class="skeleton" style="width:100px"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- USERS -->
+        <div class="section" id="section-users">
+            <div class="page-header">
+                <h1>Users</h1>
+                <p>All registered users — admin only</p>
+            </div>
+            <div class="table-card">
+                <div class="table-head">
+                    <div class="table-title">User List</div>
+                    <button class="btn-sm" onclick="loadUsers()">↺ Refresh</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="usersBody">
+                        <tr class="skeleton-row"><td><div class="skeleton" style="width:100px"></div></td><td><div class="skeleton" style="width:160px"></div></td><td><div class="skeleton" style="width:60px"></div></td><td><div class="skeleton" style="width:60px"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="section" id="section-reports">
+            <div class="page-header">
+                <h1>Reports</h1>
+                <p>Analytics and summaries</p>
+            </div>
+            <div class="table-card">
+                <div class="table-head">
+                    <div class="table-title">Summary Report</div>
+                </div>
+                <div style="padding:40px;text-align:center;color:var(--muted);font-size:0.75rem;">
+                    Connect your reporting API endpoint to display data here.
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/guard.js"></script>
+<script>
+    const statusBadge = {
+        active:  '<span class="badge badge-green">Active</span>',
+        pending: '<span class="badge badge-yellow">Pending</span>',
+        closed:  '<span class="badge badge-red">Closed</span>',
+        draft:   '<span class="badge badge-blue">Draft</span>',
+    };
+
+    const roleBadge = {
+        admin:   '<span class="badge badge-red">Admin</span>',
+        manager: '<span class="badge badge-blue">Manager</span>',
+        user:    '<span class="badge badge-green">User</span>',
+    };
+
+    window.onload = async () => {
+        const user = await guardPage(['admin']);
+        if (!user) return;
+
+        document.getElementById('navUser').textContent = user.name || user.username;
+        document.getElementById('pageLoader').classList.add('hide');
+
+        loadSchemes();
+    };
+
+    function showSection(name, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        document.getElementById('section-' + name).classList.add('active');
+        el.classList.add('active');
+
+       // if (name === 'users') loadUsers();
+       // if (name === 'schemes') loadSchemes();
+
+
+    }
+
+   
+</script>
+</body>
+</html>

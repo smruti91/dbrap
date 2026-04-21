@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DBRAP — Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+     <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+
+<!-- page loader while checking existing session -->
+<div class="page-loader" id="pageLoader">
+    <div>
+        <span class="loader-dot"></span>
+        <span class="loader-dot"></span>
+        <span class="loader-dot"></span>
+    </div>
+</div>
+
+<div class="wrapper">
+    <div class="brand">
+        <div class="brand-mark">D</div>
+        <h1>DBRAP</h1>
+        <p>Credit Scheme Management</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Sign in to your account</div>
+
+        <div class="field">
+            <label>Username</label>
+            <input
+                type="text"
+                id="username"
+                placeholder="your_username"
+                autocomplete="username"
+                autofocus
+            />
+        </div>
+
+        <div class="field">
+            <label>Password</label>
+            <input
+                type="password"
+                id="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                onkeydown="if(event.key==='Enter') handleLogin()"
+            />
+        </div>
+
+        <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+            Sign In
+        </button>
+
+        <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <div class="footer">
+        DBRAP &copy; 2025 &nbsp;·&nbsp; Secure Access
+    </div>
+</div>
+
+<script src="./assets/js/api.js"></script>
+<script src="./assets/js/guard.js"></script>
+<script>
+   const loader = document.getElementById('pageLoader');
+
+    window.onload = async () => {
+        // ✅ use dedicated function — won't redirect back to login on failure
+        const loggedIn = await checkAlreadyLoggedIn();
+        if (!loggedIn) {
+            loader.classList.add('hide');  // show login form
+        }
+        // if loggedIn = true, redirectByRole() already fired, stay on loader
+    };
+
+    async function handleLogin() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const btn      = document.getElementById('loginBtn');
+        const errorMsg = document.getElementById('errorMsg');
+
+        errorMsg.textContent = '';
+
+        if (!username || !password) {
+            showError('Please enter username and password');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add('loading');
+        btn.textContent = 'Signing in...';
+
+        try {
+            const res = await fetch(`${API}/auth/sign-in`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                showError(data.message || 'Invalid credentials');
+                return;
+            }
+
+            // get role from sign-in response or fallback to /me
+            //console.log('Sign-in response:', data); // debug
+            const role = data.data.user?.role;
+            console.log('User role from sign-in:', data.data, role); // debug
+            if (role) {
+                redirectByRole(role);
+            } else {
+                const meRes  = await apiFetch('/auth/me');
+                const meData = await meRes.json();
+                redirectByRole(meData.user.role);
+            }
+
+        } catch (err) {
+            showError('Network error. Please try again.'+ err);
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            btn.textContent = 'Sign In';
+        }
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('errorMsg');
+        el.textContent = msg;
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = '';
+    }
+</script>
+</body>
+</html>

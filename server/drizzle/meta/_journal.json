@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1776450480429,
+      "tag": "0000_brave_fabian_cortez",
+      "breakpoints": true
+    }
+  ]
+}
