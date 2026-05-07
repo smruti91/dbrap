@@ -13,7 +13,8 @@ export function createApplication(): Express{
     const app = express();
     // Middleware to parse JSON bodies
     app.use(cors({
-        origin: "http://127.0.0.1:5500", // or your frontend port
+       // origin: "http://127.0.0.1:5500", // or your frontend port
+       origin: "http://localhost", // Allow all origins for development (not recommended for production)
         credentials: true
         }));
     app.use(express.json());

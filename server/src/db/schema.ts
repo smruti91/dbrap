@@ -15,7 +15,7 @@ export const usersTable = mysqlTable('dbrap_users_table', {
   updatedAt: timestamp('updated_at').$onUpdate(()=>new Date())
 });
 // ✅ SCHEMES TABLE
-export const schemesTable = mysqlTable('m_credit_scheme_master', {
+export const schemesTable = mysqlTable('dbrap_credit_scheme_master', {
   id: int('id').primaryKey().autoincrement(),
   schemeName: varchar('schemeName', { length: 255 }),
   shortSchName: varchar('shortSchName', { length: 255 }),
@@ -33,7 +33,7 @@ export const districtTable = mysqlTable('m_district_code', {
   vchName: varchar('vchName', { length: 255 }),
 });
 
-export const dummySchemeTxnTable = mysqlTable("dummy_sheme_transcation_details", {
+export const dummySchemeTxnTable = mysqlTable("dbrap_dummy_shceme_transcation_details", {
   id: serial("id").primaryKey().notNull(),
   schemeName: varchar("SchemeName", { length: 200 }),
   moduleName: varchar("ModuleName", { length: 150 }),
@@ -61,7 +61,7 @@ export const dummySchemeTxnTable = mysqlTable("dummy_sheme_transcation_details",
   intUpdatedBy: int("intUpdatedBy").notNull().default(0),
 });
 
-export const schemeTransactions = mysqlTable("t_c_sheme_transcation_details", {
+export const schemeTransactions = mysqlTable("dbrap_scheme_transcation_details", {
   id: serial("id").primaryKey().autoincrement(),
   intSchemeId: int("intSchemeId").notNull(),
   intModuleId: int("intModuleId").notNull(),

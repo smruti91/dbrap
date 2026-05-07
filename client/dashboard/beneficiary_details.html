@@ -1,0 +1,187 @@
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- DataTables Bootstrap 5 -->
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<style>
+    :root {
+  --navy: #0B1F4B;
+  --blue: #1A56DB;
+  --blue-mid: #2563EB;
+  --sky: #EFF6FF;
+  --accent: #F59E0B;
+  --accent-soft: #FFFBEB;
+  --success: #059669;
+  --success-soft: #D1FAE5;
+  --danger: #DC2626;
+  --danger-soft: #FEE2E2;
+  --warning: #D97706;
+  --warning-soft: #FEF3C7;
+  --muted: #6B7280;
+  --border: #E5E7EB;
+  --surface: #F8FAFC;
+  --card-bg: #ffffff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: #1F2937; font-size: 14px; }
+h1,h2,h3,h4,h5,.sora { font-family: 'Sora', sans-serif; }
+
+/* TOPBAR */
+.topbar {
+  background: var(--navy);
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.topbar-brand { display: flex; align-items: center; gap: 14px; }
+.brand-logo {
+  width: 40px; height: 40px;
+  background: var(--blue);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800; font-size: 11px; color: #fff;
+  text-align: center; line-height: 1.2; flex-shrink: 0;
+}
+.brand-text-main { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; }
+.brand-text-sub { font-size: 11px; color: rgba(255,255,255,0.45); }
+.topbar-nav { display: flex; gap: 2px; }
+.tnav {
+  background: transparent; border: none;
+  color: rgba(255,255,255,0.6);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  transition: all 0.18s; white-space: nowrap;
+}
+.tnav:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.tnav.active { background: var(--blue); color: #fff; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #34D399; display: inline-block; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.live-label { font-size: 11px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px; }
+</style>
+<body class="d-flex flex-column min-vh-100">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-logo">DB<br>RAP</div>
+    <div>
+      <div class="brand-text-main">DBRAP Public Dashboard</div>
+      <div class="brand-text-sub">District Business Reforms · Odisha</div>
+    </div>
+  </div>
+  <div class="topbar-right">>
+        <button class="btn btn-warning d-flex align-items-center gap-2" onclick="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+        </button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="flex-fill">
+  <div class="container mt-4">
+    <div class="mb-4">
+      <h2 class="sora">Bank Wise Applications Details</h2>
+      <p style="color:var(--muted);">Detailed information about beneficiaries for the selected scheme and bank.</p>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-header text-white" style="background-color: #0070c0;">
+        <h5 class="mb-0">Beneficiary Details</h5>
+      </div>
+
+      <div class="card-body">
+        <table id="beneficiaryTable" class="table table-striped table-hover" >
+          <thead class="table-light">
+            <tr>
+              <th>Bank Name</th>
+              <th>Scheme Name</th>
+              <th>Applicant Name</th>
+              <th>Loan Applied</th>
+              <th>Application Date</th>
+              <th>District Name</th>
+            </tr>
+          </thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer style="background:var(--navy);" class="mt-auto">
+  <div style="padding:16px 32px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);">
+        DBRAP Public Dashboard · DPIIT · Ministry of Commerce & Industry · Government of India
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);">
+        Data via API from cspplus.odisha.gov.in
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/guard.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+
+const bankId = params.get("bankId");
+const schemeId = params.get("schemeId");
+const tableId = params.get("tableId");
+const type = params.get("type");
+console.log("Received params:", { bankId, schemeId, tableId, type }); // Debug log
+// 🔥 Call backend API
+apiFetch(`/dashboard/beneficiary-details?bankId=${bankId}&schemeId=${schemeId}&tableId=${tableId}`)
+  .then(res => res.json())
+  .then(result => {
+      loadTable(result.data);
+  });
+
+  function loadTable(data) {
+    const tbody = document.getElementById("dataBody");
+    tbody.innerHTML = "";
+
+    data.forEach(row => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${row.bankName}</td>
+            <td>${row.schemeName}</td>
+            <td>${row.applicantName}</td>
+            <td>${row.loanApplied}</td>
+            <td>${new Date(row.applicationDate).toLocaleDateString()}</td>
+              <td>${row.districtName}</td>
+        </tr>
+        `;
+    });
+
+    // Destroy if already initialized
+    if ($.fn.DataTable.isDataTable('#beneficiaryTable')) {
+        $('#beneficiaryTable').DataTable().destroy();
+    }
+
+    // Initialize
+    $('#beneficiaryTable').DataTable({
+        pageLength: 5,
+        lengthMenu: [5, 10, 25, 50],
+        ordering: true,
+        searching: true,
+        responsive: true
+    });
+}
+</script>
